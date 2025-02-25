@@ -15,15 +15,35 @@ public interface SerieRepository extends JpaRepository<Serie, Long> {
     List<Serie> findTop5ByOrderByAvaliacaoDesc();
     List<Serie> findByGenero(Categoria categoria);
 
-    @Query("SELECT s FROM Serie s WHERE s.totalTemporadas <= :numeroTemporada AND s.avaliacao >= :avaliacao")
+    @Query("SELECT s FROM Serie s " +
+            "WHERE s.totalTemporadas <= :numeroTemporada AND s.avaliacao >= :avaliacao")
     List<Serie> seriesPorTemporadaEAvaliacao(int numeroTemporada, double avaliacao);
 
-    @Query("SELECT e FROM Serie s JOIN s.episodios e WHERE e.titulo ILIKE %:trechoEpisodio%")
+    @Query("SELECT e FROM Serie s " +
+            "JOIN s.episodios e " +
+            "WHERE e.titulo ILIKE %:trechoEpisodio%")
     List<Episodio> episodiosPorTrecho(String trechoEpisodio);
 
-    @Query("SELECT e FROM Serie s JOIN s.episodios e WHERE s = :serie ORDER BY e.avaliacao DESC LIMIT 5")
-    List<Episodio> topEpisodiosPorSerie(Serie serie);
+    @Query("SELECT e FROM Serie s " +
+            "JOIN s.episodios e " +
+            "WHERE s.id = :id ORDER BY e.avaliacao DESC LIMIT 5")
+    List<Episodio> topEpisodiosPorSerie(Long id);
 
-    @Query("SELECT e FROM Serie s JOIN s.episodios e WHERE s = :serie AND YEAR(e.dataLancamento) >= :anoLancamento")
+    @Query("SELECT e FROM Serie s " +
+            "JOIN s.episodios e " +
+            "WHERE s = :serie AND YEAR(e.dataLancamento) >= :anoLancamento")
     List<Episodio> episodiosPorSerieEAno(Serie serie, int anoLancamento);
+
+    // Também retorna séries que não possuem episódios cadastrados.
+    // Caso todas as séries contenham episódios, retire o "LEFT"
+    @Query("SELECT s FROM Serie s " +
+            "LEFT JOIN s.episodios e " +
+            "GROUP BY s " +
+            "ORDER BY MAX(e.dataLancamento) DESC LIMIT 5")
+    List<Serie> lancamentosMaisRecentes();
+
+    @Query("SELECT e FROM Serie s " +
+            "JOIN s.episodios e " +
+            "WHERE s.id = :id AND e.temporada = :numero")
+    List<Episodio> obterEpisodiosPorTemporada(Long id, Long numero);
 }

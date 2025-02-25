@@ -36,7 +36,6 @@ public class Serie {
     public Serie() {
     }
 
-
     public Serie(DadosSerie dadosSerie) {
         this.titulo = dadosSerie.titulo();
         this.totalTemporadas = dadosSerie.totalTemporadas();
